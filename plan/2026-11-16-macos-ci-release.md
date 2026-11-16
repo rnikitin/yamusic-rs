@@ -48,3 +48,22 @@ GitHub Actions должен собирать macOS-приложение (`.app`)
 - `yamusic-rs-macos-universal.zip` распаковывается в рабочий `.app`; `lipo -info` на бинарнике
   показывает обе арки (arm64 + x86_64) — проверено на этом маке.
 - Windows-путь сборки/релиза не сломан.
+
+## Результат (2026-11-16)
+
+Готово: тег `v1.0.3` → прогон `43917114809` — windows/macos/release все `success`. Релиз
+[v1.0.3](https://github.com/rnikitin/yamusic-rs/releases/tag/v1.0.3) содержит
+`yamusic-rs.exe` (27 МБ) и `yamusic-rs-macos-universal.zip` (22 МБ). Проверено: артефакт
+скачан, `lipo -info` → `x86_64 arm64`, `.app` запускается на arm64-маке.
+
+Найдено и исправлено по ходу:
+1. `macos-13` выведен из GitHub (дек. 2025); для Intel используется `macos-15-intel`.
+2. `macos-latest`/`macos-15` — arm64, у бесплатных форков дефицитный: job отменялся по
+   capacity после 15 мин. `macos-15-intel` тоже иногда отменяется по capacity (нестабильно).
+   Сборка работает, когда раннер выделяется; на активном апстриме приоритет выше.
+3. `download-artifact@v4` не мог скачать exe-артефакт, загруженный с `archive: false`
+   (сырой файл). Убрал `archive: false` — exe стал обычным артефактом, в релиз попадает сырым.
+4. Кэш Swatinem/rust-cache ключуется по `Cargo.lock`; bump версии меняет lock → холодная
+   сборка (~30–40 мин на universal в Intel-раннере). Это цена universal; обычно кэш греется
+   между прогонами без смены lock.
+
