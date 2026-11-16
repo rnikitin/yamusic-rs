@@ -42,7 +42,6 @@ jobs:
         with:
           name: windows-exe
           path: target/release/yamusic-rs.exe
-          archive: false
 
   macos:
     runs-on: macos-15-intel
